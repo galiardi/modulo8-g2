@@ -57,7 +57,24 @@ async function getJewel(req, res) {
   return res.status(200).send(response);
 }
 
-async function updateJewel(req, res) {}
+async function updateJewel(req, res) {
+  const response = {
+    data: null,
+    error: null,
+  };
+
+  const { id } = req.params;
+
+  const result = await jewelsModel.update(id, req.body);
+
+  if (result === null) {
+    response.error = 'Error updating jewel';
+    return res.status(500).send(response);
+  }
+
+  response.data = result;
+  return res.status(200).send(response);
+}
 
 async function deleteJewel(req, res) {
   const response = {

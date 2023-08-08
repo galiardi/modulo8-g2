@@ -26,18 +26,8 @@ const jewelsModel = {
         );
       }
 
-      // selecciona la joya recien creada para devolverla al cliente
-      const [createdJewel] = await conn.execute(
-        `
-        SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight, JSON_ARRAYAGG(material.name) AS materials
-        FROM jewel
-        JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
-        JOIN material ON jewel_material.id_material = material.id_material
-        WHERE jewel.id_jewel = ?
-        GROUP BY jewel.id_jewel;
-      `,
-        [result.insertId]
-      );
+      // selecciona la joya recien creada con sus respectivos materiales, para devolverla al cliente
+      const createdJewel = await this.getData(conn, result.insertId);
 
       await conn.commit();
       output = createdJewel;
@@ -52,15 +42,9 @@ const jewelsModel = {
 
   async getAll() {
     try {
-      const [rows] = await promisePool.execute(
-        `
-        SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight, JSON_ARRAYAGG(material.name) AS materials
-        FROM jewel
-        JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
-        JOIN material ON jewel_material.id_material = material.id_material
-        GROUP BY jewel.id_jewel;
-        `
-      );
+      // obtiene todas las joyas con sus respectivos materiales
+      const rows = this.getData(promisePool);
+
       return rows;
     } catch (error) {
       console.log(error);
@@ -70,17 +54,8 @@ const jewelsModel = {
 
   async get(id) {
     try {
-      const [rows] = await promisePool.execute(
-        `
-        SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight, JSON_ARRAYAGG(material.name) AS materials
-        FROM jewel
-        JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
-        JOIN material ON jewel_material.id_material = material.id_material
-        WHERE jewel.id_jewel = ?
-        GROUP BY jewel.id_jewel;
-      `,
-        [id]
-      );
+      // obtiene la joya con sus respectivos materiales, segun el id proporcionado
+      const rows = await this.getData(promisePool, id);
       return rows;
     } catch (error) {
       console.log(error);
@@ -122,8 +97,11 @@ const jewelsModel = {
         );
       }
 
+      // obtiene la joya actualizada, para devolverla al cliente
+      const updatedJewel = await this.getData(conn, id);
+
       await conn.commit();
-      output = result;
+      output = updatedJewel;
     } catch (error) {
       console.log(error);
       if (conn) await conn.rollback();
@@ -155,19 +133,21 @@ const jewelsModel = {
     }
   },
 
-  // async getData(conn) {
-  //   const [createdJewel] = await conn.execute(
-  //     `
-  //     SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight, JSON_ARRAYAGG(material.name) AS materials
-  //     FROM jewel
-  //     JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
-  //     JOIN material ON jewel_material.id_material = material.id_material
-  //     WHERE jewel.id_jewel = ?
-  //     GROUP BY jewel.id_jewel;
-  //   `,
-  //     [result.insertId]
-  //   );
-  // },
+  async getData(conn, id = null) {
+    const [rows] = await conn.execute(
+      `
+      SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight, JSON_ARRAYAGG(material.name) AS materials
+      FROM jewel
+      JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
+      JOIN material ON jewel_material.id_material = material.id_material
+      ${id ? 'WHERE jewel.id_jewel = ?' : ''}
+      GROUP BY jewel.id_jewel;
+    `,
+      [id]
+    );
+
+    return rows;
+  },
 };
 
 export { jewelsModel };
