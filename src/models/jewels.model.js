@@ -48,7 +48,36 @@ const jewelsModel = {
       return rows;
     } catch (error) {
       console.log(error);
-      return false;
+      return null;
+    }
+  },
+
+  async getFiltered({ name, material }) {
+    try {
+      // filtra por name,material o ambos
+      const parameters = [];
+
+      if (name) parameters.push(name);
+      if (material) parameters.push(material);
+
+      const [rows] = await promisePool.execute(
+        `
+      SELECT jewel.id_jewel, jewel.name, jewel.price, jewel.weight
+      FROM jewel
+      JOIN jewel_material ON jewel.id_jewel = jewel_material.id_jewel
+      JOIN material ON jewel_material.id_material = material.id_material
+      WHERE ${name ? 'jewel.name = ?' : 'TRUE'} AND ${
+          material ? 'material.name = ?' : 'TRUE'
+        }
+      GROUP BY jewel.id_jewel;
+      `,
+        parameters
+      );
+
+      return rows;
+    } catch (error) {
+      console.log(error);
+      return null;
     }
   },
 

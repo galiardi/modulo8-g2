@@ -27,9 +27,17 @@ async function getAllJewels(req, res) {
     error: null,
   };
 
-  const result = await jewelsModel.getAll();
+  const { name, material } = req.query;
 
-  if (result === false) {
+  let result;
+
+  if (name || material) {
+    result = await jewelsModel.getFiltered({ name, material });
+  } else {
+    result = await jewelsModel.getAll();
+  }
+
+  if (result === null) {
     response.error = 'Error getting jewels';
     return res.status(500).send(response);
   }
