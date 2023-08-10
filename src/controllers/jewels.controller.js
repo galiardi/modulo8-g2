@@ -14,8 +14,13 @@ async function createJewel(req, res) {
     return res.status(500).send(response);
   }
 
-  // const links = getLinks({ host: req.headers.host, route: 'jewels', id: result.id });
-  // result.links = result;
+  // HATOES
+  const links = getLinks({
+    host: req.headers.host,
+    route: 'jewels',
+    id: result.id_jewel,
+  });
+  result.links = links;
 
   response.data = result;
   return res.status(201).send(response);
@@ -42,6 +47,16 @@ async function getAllJewels(req, res) {
     return res.status(500).send(response);
   }
 
+  result.forEach((jewel) => {
+    // HATOES
+    const links = getLinks({
+      host: req.headers.host,
+      route: 'jewels',
+      id: jewel.id_jewel,
+    });
+    jewel.links = links;
+  });
+
   response.data = result;
   return res.status(200).send(response);
 }
@@ -61,6 +76,14 @@ async function getJewel(req, res) {
     return res.staus(500).send(response);
   }
 
+  // HATOES
+  const links = getLinks({
+    host: req.headers.host,
+    route: 'jewels',
+    id: result.id_jewel,
+  });
+  result.links = links;
+
   response.data = result;
   return res.status(200).send(response);
 }
@@ -79,6 +102,14 @@ async function updateJewel(req, res) {
     response.error = 'Error updating jewel';
     return res.status(500).send(response);
   }
+
+  // HATOES
+  const links = getLinks({
+    host: req.headers.host,
+    route: 'jewels',
+    id: result.id_jewel,
+  });
+  result.links = links;
 
   response.data = result;
   return res.status(200).send(response);

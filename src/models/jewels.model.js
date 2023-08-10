@@ -30,7 +30,7 @@ const jewelsModel = {
       const createdJewel = await this.getData(conn, result.insertId);
 
       await conn.commit();
-      output = createdJewel;
+      output = createdJewel[0];
     } catch (error) {
       console.log(error);
       if (conn) await conn.rollback();
@@ -85,7 +85,7 @@ const jewelsModel = {
     try {
       // obtiene la joya con sus respectivos materiales, segun el id proporcionado
       const rows = await this.getData(promisePool, id);
-      return rows;
+      return rows[0];
     } catch (error) {
       console.log(error);
       return false;
@@ -130,7 +130,7 @@ const jewelsModel = {
       const updatedJewel = await this.getData(conn, id);
 
       await conn.commit();
-      output = updatedJewel;
+      output = updatedJewel[0];
     } catch (error) {
       console.log(error);
       if (conn) await conn.rollback();
